@@ -36,6 +36,7 @@ public class Graphe{
 	}
 
 	private Map<Integer, List<Arc>> voisins = new HashMap<Integer, List<Arc>>();
+	private static float[][] matriceStoch;
 	private static InputStream ips;
 	private static InputStreamReader ipsr;
 	private static BufferedReader br;
