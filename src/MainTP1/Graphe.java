@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.*;
+import java.util.Map.Entry;
 
 
 public class Graphe{
@@ -129,6 +130,16 @@ public class Graphe{
 				if (!graph.voisins.keySet().contains(Integer.parseInt(results[0])))
 					graph.ajouter(Integer.parseInt(results[0]));
 				graph.ajouter(Integer.parseInt(results[0]),Integer.parseInt(results[1]));
+			}
+			for (Integer source : graph.voisins.keySet()) 
+			{
+				for (Integer destination : graph.noeudSortant(source)) 
+				{
+					if (graph.isArc(source, destination)) 
+					{
+						matriceStoch[source][destination] = (float)(1/graph.degreSortant(source));
+					}
+				}
 			}
 		}catch(Exception e)
 		{
