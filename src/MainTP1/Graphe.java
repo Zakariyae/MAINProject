@@ -140,12 +140,9 @@ public class Graphe{
 			{
 				for (Integer destination : graph.noeudSortant(source)) 
 				{
-					if (graph.isArc(source, destination) && graph.degreSortant(source) != 0) 
-					{
-						matriceStoch[source][destination] = (float) (1.0/graph.degreSortant(source));
-						Ctable.add(matriceStoch[source][destination]);
-						Itable.add(destination);
-					}
+					matriceStoch[source][destination] = (float) (1.0/graph.degreSortant(source));
+					Ctable.add(matriceStoch[source][destination]);
+					Itable.add(destination);
 				}
 				if (premIter)
 				{
