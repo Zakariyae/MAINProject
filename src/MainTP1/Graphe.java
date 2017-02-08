@@ -6,7 +6,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.*;
-import java.util.Map.Entry;
 
 
 public class Graphe{
@@ -112,6 +111,7 @@ public class Graphe{
 		return false;
 	}
 	
+	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public static Graphe chargementGraphe(String nomFichier) throws IOException
 	{
 		Graphe graph = new Graphe();
@@ -131,16 +131,55 @@ public class Graphe{
 					graph.ajouter(Integer.parseInt(results[0]));
 				graph.ajouter(Integer.parseInt(results[0]),Integer.parseInt(results[1]));
 			}
+			
+			matriceStoch = new float[graph.voisins.keySet().size()][graph.voisins.keySet().size()];
+			ArrayList Ctable = new ArrayList();
+			ArrayList Ltable = new ArrayList();
+			ArrayList Itable = new ArrayList();
+			boolean premIter = true;
+			
 			for (Integer source : graph.voisins.keySet()) 
 			{
 				for (Integer destination : graph.noeudSortant(source)) 
 				{
-					if (graph.isArc(source, destination)) 
+					if (graph.isArc(source, destination) && graph.degreSortant(source) != 0) 
 					{
-						matriceStoch[source][destination] = (float)(1/graph.degreSortant(source));
+						matriceStoch[source][destination] = (float) (1.0/graph.degreSortant(source));
+						Ctable.add(matriceStoch[source][destination]);
+						Itable.add(destination);
 					}
 				}
+				if (premIter)
+				{
+					Ltable.add(0);
+					premIter = false;
+				}
+				Ltable.add(Ctable.size());	
 			}
+			for (int i = 0; i < matriceStoch.length; i++)
+			{
+				for (int j = 0; j < matriceStoch[i].length; j++) 
+				{
+					System.out.print(matriceStoch[i][j] + " | ");
+				}
+				System.out.println("\n");
+			}
+			System.out.println("---------------------------------------------------------------------------------------");
+			for (int i = 0; i < Ctable.size(); i++) 
+			{
+				System.out.print(Ctable.get(i) + " ");
+			}
+			System.out.println("\n---------------------------------------------------------------------------------------");
+			for (int i = 0; i < Ltable.size(); i++) 
+			{
+				System.out.print(Ltable.get(i) + " ");
+			}
+			System.out.println("\n---------------------------------------------------------------------------------------");
+			for (int i = 0; i < Itable.size(); i++) 
+			{
+				System.out.print(Itable.get(i) + " ");
+			}
+			System.out.println("\n---------------------------------------------------------------------------------------");
 		}catch(Exception e)
 		{
 			e.printStackTrace();
@@ -170,7 +209,7 @@ public class Graphe{
 	public static void main(String[] args) 
 	{
 		args = new String[1];
-		args[0] = "src/MainTP1Files/Example.txt";
+		args[0] = "src/MainTP1Files/Example_.txt";
 		if(args.length == 1)
 		{
 			try {
