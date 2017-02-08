@@ -154,7 +154,7 @@ public class Graphe{
 					Ltable.add(0);
 					premIter = false;
 				}
-				Ltable.add(Ctable.size());	
+				Ltable.add(Ctable.size());
 			}
 			for (int i = 0; i < matriceStoch.length; i++)
 			{
