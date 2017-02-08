@@ -127,8 +127,6 @@ public class Graphe{
 				if(line.charAt(0) == '#')
 					continue;
 				results = line.split("\t");
-				if (!graph.voisins.keySet().contains(Integer.parseInt(results[0])))
-					graph.ajouter(Integer.parseInt(results[0]));
 				graph.ajouter(Integer.parseInt(results[0]),Integer.parseInt(results[1]));
 			}
 			
