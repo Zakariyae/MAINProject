@@ -36,7 +36,17 @@ public class Graphe{
 	}
 
 	private Map<Integer, List<Arc>> voisins = new HashMap<Integer, List<Arc>>();
-	private static float[][] matriceStoch;
+	/*
+	 * Matrice Stochastique
+	 */
+	//private static float[][] matriceStoch;
+	@SuppressWarnings("rawtypes")
+	private static List Ctable;
+	@SuppressWarnings("rawtypes")
+	private static List Ltable;
+	@SuppressWarnings("rawtypes")
+	private static List Itable;
+	private int nbrePas;
 	private static InputStream ips;
 	private static InputStreamReader ipsr;
 	private static BufferedReader br;
@@ -74,6 +84,11 @@ public class Graphe{
 	public int degreSortant(Integer integer) 
 	{
 		return voisins.get(integer).size();
+	}
+	
+	public int getNbrePas() 
+	{
+		return nbrePas;
 	}
 
 	public int degreEntrant(Integer sommet) 
@@ -129,19 +144,25 @@ public class Graphe{
 				results = line.split("\t");
 				graph.ajouter(Integer.parseInt(results[0]),Integer.parseInt(results[1]));
 			}
-			
-			matriceStoch = new float[graph.voisins.keySet().size()][graph.voisins.keySet().size()];
-			ArrayList Ctable = new ArrayList();
-			ArrayList Ltable = new ArrayList();
-			ArrayList Itable = new ArrayList();
+			/*
+			 * Spécification de la taille de la matrice stochastique
+			 */
+			//matriceStoch = new float[graph.voisins.keySet().size()][graph.voisins.keySet().size()];
+			Ctable = new ArrayList();
+			Ltable = new ArrayList();
+			Itable = new ArrayList();
 			boolean premIter = true;
 			
 			for (Integer source : graph.voisins.keySet()) 
 			{
 				for (Integer destination : graph.noeudSortant(source)) 
 				{
-					matriceStoch[source][destination] = (float) (1.0/graph.degreSortant(source));
-					Ctable.add(matriceStoch[source][destination]);
+					/*
+					 * Remplissage de la matrice stochastique
+					 */
+					//matriceStoch[source][destination] = (float) (1.0/graph.degreSortant(source));
+					//Ctable.add(matriceStoch[source][destination]);
+					Ctable.add((float) (1.0/graph.degreSortant(source)));
 					Itable.add(destination);
 				}
 				if (premIter)
@@ -151,15 +172,18 @@ public class Graphe{
 				}
 				Ltable.add(Ctable.size());
 			}
-			for (int i = 0; i < matriceStoch.length; i++)
-			{
-				for (int j = 0; j < matriceStoch[i].length; j++) 
-				{
-					System.out.print(matriceStoch[i][j] + " | ");
-				}
-				System.out.println("\n");
-			}
-			System.out.println("---------------------------------------------------------------------------------------");
+			/*
+			 * Affichage de la matrice stockastique
+			 */
+//			for (int i = 0; i < matriceStoch.length; i++)
+//			{
+//				for (int j = 0; j < matriceStoch[i].length; j++) 
+//				{
+//					System.out.print(matriceStoch[i][j] + " | ");
+//				}
+//				System.out.println("\n");
+//			}
+//			System.out.println("---------------------------------------------------------------------------------------");
 			for (int i = 0; i < Ctable.size(); i++) 
 			{
 				System.out.print(Ctable.get(i) + " ");
@@ -201,26 +225,129 @@ public class Graphe{
 		voisins.remove(a.getSommet());
 	}
 	
-	public static void main(String[] args) 
+	public float[] prodScalZero(float[] X)
 	{
-		args = new String[1];
-		args[0] = "src/MainTP1Files/Example_.txt";
-		if(args.length == 1)
+		float[] Y = new float[voisins.keySet().size()];
+		
+		for (int i = 0; i < Y.length; i++) 
 		{
-			try {
-				Graphe graphe = Graphe.chargementGraphe(args[0]);
-				for(Integer d : graphe.getVoisins().keySet())
-				{
-					System.out.println("Degree Entrant pour le sommet " + d + " est " + graphe.degreEntrant(d));
-					System.out.println("Degree Sortant pour le sommet " + d + " est " + graphe.degreSortant(d));
-					System.out.println("Noeuds Entrant pour le sommet " + d + " est " + graphe.noeudEntrant(d));
-					System.out.println("Noeuds Sortant pour le sommet " + d + " est " + graphe.noeudSortant(d));
-					System.out.println("---------------------------------------------------------------------------------------");
-				}
-			} catch (IOException e) 
+			for (int j = (int)Ltable.get(i); j < (int)Ltable.get(i+1); j++) 
 			{
-				e.printStackTrace();
+				Y[i] += (float)Ctable.get(j) * X[(int)Itable.get(j)];
 			}
 		}
+		
+		return Y;
+	}
+	
+	public float[] prodScalZap(float[] X, float d)
+	{
+		float[] Y = new float[voisins.keySet().size()];
+		
+		for (int i = 0; i < Y.length; i++) 
+		{
+			for (int j = (int)Ltable.get(i); j < (int)Ltable.get(i+1); j++) 
+			{
+				Y[(int)Itable.get(j)] += (float)Ctable.get(j) * X[i];
+			}
+		}
+		
+		for (int i = 0; i < Y.length; i++)
+		{
+			Y[i] = (d/voisins.keySet().size()) + (1-d) * Y[i];
+		}
+		
+		return Y;
+	}
+	
+	public float[] pageRankZero(float epsilon)
+	{
+		float[] X = new float[voisins.keySet().size()];
+		X[0] = 1;
+		float[] Y = X;
+		float norme = 1;
+		nbrePas = 0;
+		
+        while (norme > epsilon)
+        {
+            X = prodScalZero(X);
+            norme = normalVect(X,Y);
+            Y = X;
+            nbrePas++;
+        }
+        
+        return X;
+	}
+	
+	public float[] pageRankZap(float epsilon, float d)
+	{
+		float[] X = new float[voisins.keySet().size()];
+		Arrays.fill(X, 1/(float)X.length);
+		float[] Y = X;
+		float norme = 1;
+		nbrePas = 0;
+		
+        while (norme > epsilon)
+        {
+            X = prodScalZap(X,d);
+            norme = normalVect(X,Y);
+            Y = X;
+            nbrePas++;
+        }
+        
+        return X;
+	}
+	
+	public float normalVect(float[] X, float[] Y)
+	{
+		float norme = 0;
+	       
+        for(int i = 0; i < X.length; i++)
+        {
+        	norme += (float) Math.pow((X[i] - Y[i]), 2);
+        }
+        
+        return (float) Math.sqrt(norme);
+	}
+	
+	public static void main(String[] args) throws IOException
+	{
+		if(args.length == 3)
+		{
+			Graphe graphe = Graphe.chargementGraphe(args[1]);
+			for(Integer d : graphe.getVoisins().keySet())
+			{
+				System.out.println("Degree Entrant pour le sommet " + d + " est " + graphe.degreEntrant(d));
+				System.out.println("Degree Sortant pour le sommet " + d + " est " + graphe.degreSortant(d));
+				System.out.println("Noeuds Entrant pour le sommet " + d + " est " + graphe.noeudEntrant(d));
+				System.out.println("Noeuds Sortant pour le sommet " + d + " est " + graphe.noeudSortant(d));
+				System.out.println("---------------------------------------------------------------------------------------");
+			}
+			if (args[0].equals("-pr0")) 
+			{
+				System.out.println(Arrays.toString(graphe.pageRankZero(Float.parseFloat(args[2]))));
+				System.out.println("Nombre de Pas : " + graphe.getNbrePas());
+			}else
+				System.out.println("L'un de vos paramètres est invalides…");		
+		}
+		else if(args.length == 4)
+		{
+			Graphe graphe = Graphe.chargementGraphe(args[1]);
+			for(Integer d : graphe.getVoisins().keySet())
+			{
+				System.out.println("Degree Entrant pour le sommet " + d + " est " + graphe.degreEntrant(d));
+				System.out.println("Degree Sortant pour le sommet " + d + " est " + graphe.degreSortant(d));
+				System.out.println("Noeuds Entrant pour le sommet " + d + " est " + graphe.noeudEntrant(d));
+				System.out.println("Noeuds Sortant pour le sommet " + d + " est " + graphe.noeudSortant(d));
+				System.out.println("---------------------------------------------------------------------------------------");
+			}
+			if (args[0].equals("-zap")) 
+			{
+				System.out.println(Arrays.toString(graphe.pageRankZap(Float.parseFloat(args[2]),Float.parseFloat(args[3]))));
+				System.out.println("Nombre de Pas : " + graphe.getNbrePas());
+			}else
+				System.out.println("L'un de vos paramètres est invalides…");
+		}else
+			System.out.println("Manque de paramètres…");
 	}
 }
