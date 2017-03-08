@@ -10,31 +10,6 @@ import java.util.*;
 
 public class Graphe{
 
-	public static class Arc 
-	{
-		private Integer sommet;
-
-		public Arc(Integer sommet) 
-		{
-			this.sommet = sommet;
-		}
-		
-		public void setSommet(Integer sommet) 
-		{
-			this.sommet = sommet;
-		}
-
-		public Integer getSommet()
-		{
-			return sommet;
-		}
-		
-		@Override
-		public String toString() {
-			return "Arc avec (Sommet = " + sommet + ")";
-		}
-	}
-
 	private Map<Integer, List<Arc>> voisins = new HashMap<Integer, List<Arc>>();
 	/*
 	 * Matrice Stochastique
@@ -100,7 +75,7 @@ public class Graphe{
 	{
 		List<Integer> list = new ArrayList<Integer>();
 		for (Arc e : voisins.get(sommet))
-			list.add(e.sommet);
+			list.add(e.getSommet());
 		return list;
 	}
 
@@ -110,7 +85,7 @@ public class Graphe{
 		for (Integer a : voisins.keySet())
 		{
 			for (Arc e : voisins.get(a))
-				if (e.sommet.equals(sommet))
+				if (e.getSommet().equals(sommet))
 					listIn.add(a);
 		}
 		return listIn;
@@ -120,7 +95,7 @@ public class Graphe{
 	{
 		for (Arc e : voisins.get(de)) 
 		{
-			if (e.sommet.equals(a))
+			if (e.getSommet().equals(a))
 				return true;
 		}
 		return false;
@@ -248,14 +223,16 @@ public class Graphe{
 		{
 			for (int j = (int)Ltable.get(i); j < (int)Ltable.get(i+1); j++) 
 			{
-				Y[(int)Itable.get(j)] += (float)Ctable.get(j) * X[i];
+				Y[(int)Itable.get(j)] += ((d/voisins.keySet().size()) + (1-d)) * (float)Ctable.get(j) * X[i];
 			}
 		}
 		
+		/*
 		for (int i = 0; i < Y.length; i++)
 		{
 			Y[i] = (d/voisins.keySet().size()) + (1-d) * Y[i];
 		}
+		*/
 		
 		return Y;
 	}
